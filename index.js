@@ -10,20 +10,19 @@ const product = require('./products.json');
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.q66zrl2.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
-});
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gp7ekja.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = 'mongodb://localhost:27017';
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 const run = async () => {
   try {
-    const db = client.db("moontech");
-    const productCollection = db.collection("product");
+    const db = client.db("moonTech");
+    const productCollection = db.collection("products");
 
     app.get("/products", async (req, res) => {
-      res.send({ status: true, data: product });
+      const query = {};
+      const result = await productCollection.find(query).toArray();
+      res.send({ status: true, data: result });
     });
 
     app.post("/product", async (req, res) => {
@@ -36,10 +35,48 @@ const run = async () => {
 
     app.delete("/product/:id", async (req, res) => {
       const id = req.params.id;
-
       const result = await productCollection.deleteOne({ _id: ObjectId(id) });
       res.send(result);
     });
+
+    app.patch("/product/:id", async(req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const newProduct = req.body;
+      console.log(newProduct);
+      const filter = { _id: id };
+      const options = { upsert: true };
+      let updateDoc = {};
+
+      
+      if(newProduct.status){
+        updateDoc = {
+          $set: {
+            model: newProduct.model,
+              brand: newProduct.brand,
+              status: true,
+              price: newProduct.price,
+              keyFeature: newProduct.keyFeature,
+              spec: [],
+          },
+        }
+      }
+      else{
+        updateDoc = {
+          $set: {
+            model: newProduct.model,
+              brand: newProduct.brand,
+              status: false,
+              price: newProduct.price,
+              keyFeature: newProduct.keyFeature,
+              spec: [],
+          },
+        }
+      }
+      const result = await productCollection.updateOne(filter, updateDoc, options);
+
+      res.send(result);
+    })
   } finally {
   }
 };
