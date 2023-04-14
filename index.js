@@ -44,7 +44,8 @@ const run = async () => {
       console.log(id);
       const newProduct = req.body;
       console.log(newProduct);
-      const filter = { _id: id };
+      const filter = { _id: ObjectId(id) };
+      console.log(filter);
       const options = { upsert: true };
       let updateDoc = {};
 
