@@ -41,11 +41,11 @@ const run = async () => {
 
     app.patch("/product/:id", async(req, res) => {
       const id = req.params.id;
-      console.log(id);
+      // console.log(id);
       const newProduct = req.body;
-      console.log(newProduct);
+      // console.log(newProduct);
       const filter = { _id: ObjectId(id) };
-      console.log(filter);
+      // console.log(filter);
       const options = { upsert: true };
       let updateDoc = {};
 
